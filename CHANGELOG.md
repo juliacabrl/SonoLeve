@@ -1,5 +1,12 @@
 # CHANGELOG
 
+## [08/09/2026]
+
+### Adicionado
+
+- Criado o documento `docs/personas.md`;
+- Adicionadas as personas Jennifer Lopes e Letícia Manuela;
+
 ## [01/09/2026]
 
 ### Adicionado
