@@ -1,8 +1,6 @@
 
 # Personas do Projeto SonoLeve
 
-As personas foram elaboradas para representar os principais perfis de usuários do aplicativo SonoLeve. Foram considerados aspectos como rotina, dificuldades para dormir, objetivos, necessidades, comportamentos e a relação de cada pessoa com o aplicativo.
-
 ## Persona 1 — Jennifer Lopes
 
 ### Informações pessoais
