@@ -9,7 +9,7 @@
 - Criado o documento `docs/pesquisa.md`;
 - Adicionadas informações da pesquisa sobre qualidade do sono, necessidades, dificuldades, dados importantes, descobertas e fontes utilizadas.
 
-## [01/09/2026]
+## [03/09/2026]
 
 ### Adicionado
 
