@@ -15,3 +15,10 @@
 
 - Análise inicial do estudo de caso do aplicativo SonoLeve.
 - Criado o documento `docs/estudo-de-caso.md`.
+
+## [15/09/2026]
+
+### Adicionado
+
+- Criado o documento `docs/crud.md`;
+- Documentadas as operações de criar, consultar, atualizar e excluir registros de sono.
