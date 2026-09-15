@@ -22,3 +22,5 @@
 
 - Criado o documento `docs/crud.md`;
 - Documentadas as operações de criar, consultar, atualizar e excluir registros de sono.
+- Criado o documento "docs/funcionalidades.md"
+- Adicionado as principais funcionalidades do app 
