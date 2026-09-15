@@ -10,5 +10,5 @@ O SonoLeve é um aplicativo voltado para higiene do sono e relaxamento. A propos
 
 - Carlos Eduardo dos Santos Silva - Requisitos Funcionais
 - Julia Cabral da Silva - Funcionalidades 
-- João Gabriel Batista dos Santos - Requisitos não funcionais; priorização.
-- Maria Eduarda Aristides Gomes - CRUD; Finalizar requisitos.
+- João Gabriel Batista dos Santos - Requisitos não funcionais e priorização.
+- Maria Eduarda Aristides Gomes - CRUD e Finalizar requisitos.
