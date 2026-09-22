@@ -26,3 +26,11 @@
 - Adicionado as principais funcionalidades do app.
 - Criado o documento `docs/requisitos.md`
 - Adicionados os requisitos funcionais críticos para o funcionamento do sistema.
+
+
+## [21/09/2026]
+
+### Adicionado
+
+- Criado o  protótipo de baixa fidelidade
+
