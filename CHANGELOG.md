@@ -33,4 +33,6 @@
 ### Adicionado
 
 - Criado o  protótipo de baixa fidelidade
-
+- Criado o documento `docs/prototipoBaixaFidelidade.pdf`
+- Criado o protótipo de alta fidelidade.
+- Criado o documento `docs/prototapion.pdf`
