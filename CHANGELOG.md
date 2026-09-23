@@ -34,5 +34,9 @@
 
 - Criado o  protótipo de baixa fidelidade
 - Criado o documento `docs/prototipoBaixaFidelidade.pdf`
+
+## [22/09/2026]
+
+### Adicionado
 - Criado o protótipo de alta fidelidade.
 - Criada a pasta `prototype`
