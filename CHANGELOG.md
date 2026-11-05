@@ -40,3 +40,10 @@
 ### Adicionado
 - Criado o protótipo de alta fidelidade.
 - Criada a pasta `prototype`
+
+- ## [03/11/2026]
+
+### Adicionado
+- Iniciamos com a arquitetura
+- Fluxos de navegação
+- casos de uso
