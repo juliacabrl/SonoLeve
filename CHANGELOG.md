@@ -44,6 +44,7 @@
 - ## [03/11/2026]
 
 ### Adicionado
-- Iniciamos com a arquitetura
-- Fluxos de navegação
-- casos de uso
+- Iniciamos com a arquitetura - Julia Cabral
+- Fluxos de navegação - Maria Eduarda 
+- casos de uso - Carlos Eduardo dos Santos 
+- Modelagem de domínio e DER do banco de dados - João Gabriel Batista 
