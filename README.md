@@ -13,5 +13,11 @@ O SonoLeve é um aplicativo voltado para higiene do sono e relaxamento. A propos
 - João Gabriel Batista dos Santos - Justificativas
 - Maria Eduarda Aristides Gomes - Produçao do slide
 
-TODOS CONTRIBUÍRAM NO DESENVOLVIMENTO DOS PROTÓTIPOS 
- 
+- ## [03/11/2026]
+
+### Adicionado
+- Arquitetura - Julia Cabral
+- Fluxos de navegação - Maria Eduarda 
+- Casos de uso - Carlos Eduardo dos Santos 
+- Modelagem de domínio e DER do banco de dados - João Gabriel Batista 
+
