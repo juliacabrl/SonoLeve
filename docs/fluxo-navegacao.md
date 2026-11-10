@@ -15,6 +15,7 @@ no máximo, 3 interações da abertura do app.
 ```mermaid
 flowchart TD
     SPLASH["Splash / Verificação de login"]
+    SPLASH -.->|em segundo plano, se online| SYNC["Sincronizar catálogo<br/>(sons, dicas, hábitos, respiração)"]
     SPLASH -->|sem sessão| LOGIN["Login"]
     SPLASH -->|com sessão| HOJE
 
@@ -49,6 +50,10 @@ flowchart TD
     CONFIG -->|excluir meus dados| CONFIG
 ```
 
+> A sincronização do catálogo não bloqueia a navegação: as telas abrem com o conteúdo em
+> cache (ou embarcado no primeiro uso) e são atualizadas quando há versão nova. Detalhes em
+> `modelagem-banco-dados.md`, seção 5.
+
 ---
 
 ## 2. Fluxo de autenticação
@@ -77,32 +82,40 @@ senha fraca e ausência de conexão devem exibir mensagens claras, sem travar a 
 ## 3. Fluxo de relaxamento
 
 Protótipo "Encontre o seu silêncio". Atende F03/F02 e o requisito offline (RNF04).
-Em **3 toques**: abrir app → Relaxar → escolher som.
+Em **3 toques**: abrir app → Relaxar → escolher som. A lista de sons e técnicas vem do
+catálogo em cache.
 
 ```mermaid
 flowchart LR
     H["Hoje"] -->|Relaxar / Começar a relaxar| R["Relaxar"]
     R --> S{"Escolher recurso"}
-    S -->|Chuva suave| P["Player em loop"]
-    S -->|Ondas do mar| P
-    S -->|Vento nas folhas| P
+    S -->|Chuva suave · Ondas do mar · Vento nas folhas| A{"Áudio já está<br/>no aparelho?"}
+    A -->|sim| P["Player em loop"]
+    A -->|não| N{"Há conexão?"}
+    N -->|sim| D["Baixar do Storage"] --> P
+    N -->|não| X["Aviso: disponível<br/>quando conectado"] --> R
     S -->|Respiração 4-7-8| B["Respiração guiada"]
     P -->|pausar / trocar som| R
     B -->|concluir ciclos| R
 ```
 
+**Tratamento de falhas (item a.iv do projeto):** sem internet e sem o áudio baixado, o som
+aparece como "disponível quando conectado" e os demais sons continuam tocando normalmente.
+
 ---
 
 ## 4. Fluxo do ritual noturno (checklist)
 
-Protótipo "Seu ritual, no seu tempo". Atende F01, RF01/RF02.
+Protótipo "Seu ritual, no seu tempo". Atende F01, RF01/RF02. Os hábitos vêm do catálogo
+(`conteudo_habitos`) e o progresso é gravado **somente no dispositivo**, sem passar pelo
+Firestore.
 
 ```mermaid
 flowchart LR
-    H["Hoje"] -->|Meu ritual| C["Checklist do dia"]
+    H["Hoje"] -->|Meu ritual| C["Checklist do dia<br/>(hábitos do catálogo)"]
     C --> M["Marcar / desmarcar hábito"]
     M --> U["Atualiza progresso<br/>(ex.: 2 de 4)"]
-    U -->|persiste| FS[("checklistDiario/{hoje}")]
+    U -->|persiste| L[("💾 shared_preferences<br/>(local, por dia)")]
     U --> C
 ```
 
@@ -151,9 +164,9 @@ flowchart TD
 | Login / Cadastro | — | Autenticação (Firebase Auth) |
 | **Hoje** (Home) | "O dia pode ficar lá fora" | Atalhos: Meu ritual, Relaxar, Respirar + bottom nav |
 | **Relaxar** | "Encontre o seu silêncio" | Lista de sons + respiração 4-7-8 (F02, F03) |
-| Player de som | — | Reprodução em loop, offline (F03) |
+| Player de som | — | Reprodução em loop do áudio baixado ou embarcado, offline (F03) |
 | Respiração 4-7-8 | — | Exercício guiado (F02) |
-| **Ritual noturno** | "Seu ritual, no seu tempo" | Checklist de hábitos (F01) |
+| **Ritual noturno** | "Seu ritual, no seu tempo" | Checklist de hábitos do catálogo, progresso local (F01) |
 | **Diário** | "Registro do sono" | Histórico, novo registro, gráfico (F04–F06) |
 | Registrar / Editar | — | CRUD de RegistroSono (RF06–RF10) |
 | Gráfico semanal | — | Acompanhamento semanal (RF11) |
@@ -164,4 +177,4 @@ flowchart TD
 ### Documentos relacionados
 - `arquitetura.md` — camadas e integração Firebase
 - `modelo-dominio.md` — entidades envolvidas em cada fluxo
-- `modelagem-banco-dados.md` — onde cada fluxo grava no Firestore
+- `modelagem-banco-dados.md` — onde cada fluxo lê e grava (Firestore, Storage ou local)

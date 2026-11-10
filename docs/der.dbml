@@ -10,17 +10,25 @@
 // para fins de documentacao e visualizacao.
 //
 // Mapeamento Firestore -> DER:
-//   usuarios/{uid} .............................. tabela usuarios (+ preferencias_usuario 1:1)
-//   usuarios/{uid}/registrosSono/{id} ........... tabela registros_sono
+//   1) DADOS DO USUARIO (privados, escopados por uid)
+//      usuarios/{uid} ............................ usuarios (+ preferencias_usuario 1:1)
+//      usuarios/{uid}/registrosSono/{id} ......... registros_sono
+//   2) CATALOGO DE CONTEUDO (global, igual para todos, so leitura no app)
+//      config/catalogo ........................... config_catalogo
+//      conteudo_sons/{id} ........................ conteudo_sons (audio no Firebase Storage)
+//      conteudo_dicas/{id} ....................... conteudo_dicas
+//      conteudo_habitos/{id} ..................... conteudo_habitos
+//      conteudo_respiracao/{id} .................. conteudo_respiracao
+//
+// O catalogo e mantido pela equipe via Console do Firebase: trocar um
+// conteudo NAO exige nova versao do app. O app guarda o catalogo em
+// cache (e os audios no aparelho) para funcionar offline (RNF04).
 //
 // NAO vai ao banco (fora deste DER):
-//   - Catalogo de habitos do checklist: estatico e global (igual para
-//     todos), empacotado como asset do app.
 //   - Progresso diario do checklist (quais habitos o usuario marcou):
-//     armazenado SOMENTE no dispositivo (shared_preferences), reseta
-//     por dia e nao sincroniza com a nuvem.
-//   - Conteudo de relaxamento (sons, respiracao 4-7-8, dicas): assets
-//     do app (requisito offline RNF04).
+//     armazenado SOMENTE no dispositivo (shared_preferences), guardando
+//     os IDs de conteudo_habitos concluidos no dia. Reseta por dia e
+//     nao sincroniza com a nuvem.
 // =============================================================
 
 Project SonoLeve {
@@ -28,9 +36,10 @@ Project SonoLeve {
   Note: '''
   App de higiene do sono e relaxamento.
   Dados pessoais escopados por usuario (uid do Firebase Auth).
-  Apenas o DIARIO DO SONO e persistido na nuvem.
+  Catalogo de conteudo global, gerenciado remotamente.
   Regras de negocio: qualidade 1..5 (RN01); horas 0..24 (RN02);
-  1 registro por dia (RN03); observacao <= 280 (RN04).
+  1 registro por dia (RN03); observacao <= 280 (RN04);
+  catalogo somente leitura para o usuario (RN08).
   '''
 }
 
@@ -66,12 +75,73 @@ Table registros_sono {
   indexes {
     (uid, data) [unique, name: 'uq_registro_por_dia'] // RN03: 1 registro por dia
   }
-  Note: 'Subcolecao usuarios/{uid}/registrosSono. Entidade central e UNICO CRUD na nuvem (RF06-RF10).'
+  Note: 'Subcolecao usuarios/{uid}/registrosSono. Entidade central do CRUD (RF06-RF10).'
+}
+
+// ================= CATALOGO DE CONTEUDO (GLOBAL) =================
+
+Table config_catalogo {
+  id varchar [pk, note: 'Documento unico: "catalogo"']
+  versao int [not null, note: 'Incrementada a cada alteracao no catalogo']
+  atualizado_em timestamp [not null]
+
+  Note: 'config/catalogo. O app compara a versao para saber se precisa sincronizar (RN09).'
+}
+
+Table conteudo_sons {
+  id varchar [pk, note: 'Ex.: chuva_suave, ondas_mar, vento_folhas']
+  nome varchar [not null, note: 'Ex.: Chuva suave']
+  descricao varchar
+  icone varchar [note: 'Nome do icone na UI']
+  caminho_storage varchar [not null, note: 'Firebase Storage: sons/{id}.mp3']
+  duracao_seg int [note: 'Duracao do trecho em loop']
+  tamanho_bytes int [note: 'Usado para avisar antes de baixar']
+  ordem int [not null, default: 0]
+  ativo boolean [not null, default: true, note: 'false = oculto no app']
+  atualizado_em timestamp [not null]
+
+  Note: 'conteudo_sons/{id}. Metadados no Firestore; o arquivo de audio fica no Storage (F03).'
+}
+
+Table conteudo_dicas {
+  id varchar [pk]
+  titulo varchar [not null]
+  conteudo varchar [not null]
+  ordem int [not null, default: 0]
+  ativo boolean [not null, default: true]
+  atualizado_em timestamp [not null]
+
+  Note: 'conteudo_dicas/{id}. Dicas de higiene do sono (F07, RF12).'
+}
+
+Table conteudo_habitos {
+  id varchar [pk, note: 'Ex.: luz, notificacoes, lugar, tempo']
+  titulo varchar [not null, note: 'Ex.: Reduzir a luz do ambiente']
+  descricao varchar
+  ordem int [not null, default: 0]
+  ativo boolean [not null, default: true]
+  atualizado_em timestamp [not null]
+
+  Note: 'conteudo_habitos/{id}. Itens do checklist noturno (F01). O progresso de cada usuario fica local.'
+}
+
+Table conteudo_respiracao {
+  id varchar [pk, note: 'Ex.: 4-7-8']
+  nome varchar [not null, note: 'Ex.: Respiracao 4-7-8']
+  inspirar_seg int [not null, default: 4]
+  segurar_seg int [not null, default: 7]
+  expirar_seg int [not null, default: 8]
+  ciclos int [not null, default: 4]
+  ativo boolean [not null, default: true]
+  atualizado_em timestamp [not null]
+
+  Note: 'conteudo_respiracao/{id}. Parametros das tecnicas guiadas (F02).'
 }
 
 // --------- Relacionamentos ---------
 Ref: preferencias_usuario.uid - usuarios.uid   // 1:1
 Ref: registros_sono.uid > usuarios.uid         // 1:N
+// O catalogo nao tem relacao com usuarios: e global e igual para todos.
 
 // --------- Agrupamento visual ---------
 TableGroup conta_do_usuario {
@@ -81,4 +151,12 @@ TableGroup conta_do_usuario {
 
 TableGroup dados_do_usuario {
   registros_sono
+}
+
+TableGroup catalogo_global {
+  config_catalogo
+  conteudo_sons
+  conteudo_dicas
+  conteudo_habitos
+  conteudo_respiracao
 }

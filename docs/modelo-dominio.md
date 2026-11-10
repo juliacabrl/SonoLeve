@@ -6,6 +6,14 @@
 Este modelo representa as classes de domínio em **Dart**. Ele é a base para a
 `modelagem-banco-dados.md`, que mostra como essas classes se mapeiam para o Firestore.
 
+As classes se dividem em três grupos:
+
+- **Dados do usuário**: `Usuario`, `PreferenciasUsuario` e `RegistroSono`, gravados no Firestore.
+- **Catálogo de conteúdo**: `Som`, `DicaHigieneSono`, `ItemHabito`, `SessaoRespiracao` e
+  `VersaoCatalogo`, lidos do Firestore (áudios no Storage) e guardados em cache.
+- **Estado local e cálculos**: `ChecklistDiario`, gravado no dispositivo, e `ResumoSemanal`,
+  calculado em memória.
+
 ---
 
 ## 1. Diagrama de classes
@@ -29,7 +37,7 @@ classDiagram
       +bool temaAutomatico
       +String horaInicioNoite
       +String horaFimNoite
-      +bool ehPeriodoNoturno(agora) bool
+      +ehPeriodoNoturno(agora) bool
     }
 
     class RegistroSono {
@@ -46,47 +54,58 @@ classDiagram
     }
 
     class ChecklistDiario {
-      +String id
       +DateTime data
-      +List~ItemHabito~ habitos
-      +totalConcluidos() int
-      +totalItens() int
-      +progresso() double
-      +marcarHabito(idHabito, concluido) void
+      +Set~String~ idsConcluidos
+      +alternar(idHabito) void
+      +estaConcluido(idHabito) bool
+      +progresso(habitosAtivos) double
+    }
+
+    class VersaoCatalogo {
+      +int versao
+      +DateTime atualizadoEm
+      +precisaSincronizar(versaoLocal) bool
+    }
+
+    class ItemConteudo {
+      <<abstract>>
+      +String id
+      +int ordem
+      +bool ativo
+      +DateTime atualizadoEm
     }
 
     class ItemHabito {
-      +String id
       +String titulo
       +String descricao
-      +bool concluido
-      +alternar() void
+      +fromMap(id, map) ItemHabito$
     }
 
     class Som {
-      +String id
       +String nome
       +String descricao
-      +String arquivoAsset
       +String icone
-      +reproduzirEmLoop() void
-      +pausar() void
+      +String caminhoStorage
+      +String caminhoLocal
+      +int duracaoSeg
+      +disponivelOffline() bool
+      +fromMap(id, map) Som$
     }
 
     class SessaoRespiracao {
-      +String id
       +String nome
       +int inspirarSeg
       +int segurarSeg
       +int expirarSeg
       +int ciclos
       +duracaoTotal() Duration
+      +fromMap(id, map) SessaoRespiracao$
     }
 
     class DicaHigieneSono {
-      +String id
       +String titulo
       +String conteudo
+      +fromMap(id, map) DicaHigieneSono$
     }
 
     class ResumoSemanal {
@@ -99,9 +118,13 @@ classDiagram
 
     Usuario "1" *-- "1" PreferenciasUsuario : possui
     Usuario "1" o-- "0..*" RegistroSono : registra
-    Usuario "1" o-- "0..*" ChecklistDiario : preenche
-    ChecklistDiario "1" *-- "1..*" ItemHabito : contém
     ResumoSemanal ..> RegistroSono : agrega
+    ItemConteudo <|-- Som
+    ItemConteudo <|-- DicaHigieneSono
+    ItemConteudo <|-- ItemHabito
+    ItemConteudo <|-- SessaoRespiracao
+    ChecklistDiario ..> ItemHabito : referencia por id
+    VersaoCatalogo ..> ItemConteudo : controla sincronização
 ```
 
 ---
@@ -140,22 +163,37 @@ paleta conforme o horário configurado.
 Método `valido()` concentra as validações (regra de negócio) antes de persistir.
 `toMap()`/`fromMap()` fazem a serialização para o Firestore.
 
-### `ChecklistDiario` e `ItemHabito` — ritual noturno
-Representam o checklist de higiene do sono por dia (F01, RF01/RF02). O `ChecklistDiario`
-agrupa os hábitos marcados em uma data; cada `ItemHabito` é um hábito (ex.: "Reduzir a luz
-do ambiente", "Silenciar as notificações"). `progresso()` devolve a fração concluída
-(ex.: 2 de 4) exibida na tela "Seu ritual".
+### `ChecklistDiario` — progresso do ritual noturno (local)
+Guarda o progresso do checklist de higiene do sono em uma data (F01, RF01/RF02). Armazena
+**apenas os IDs** dos hábitos concluídos (`idsConcluidos`); o título de cada hábito vem de
+`ItemHabito`. `progresso(habitosAtivos)` devolve a fração concluída considerando só os
+hábitos ativos (ex.: 2 de 4), exibida na tela "Seu ritual". É gravado no dispositivo.
 
-### `Som` — conteúdo de relaxamento (catálogo estático)
-Som da natureza empacotado como asset (F03, RNF04). Não pertence a um usuário; é conteúdo
-fixo do app. Ex.: Chuva suave, Ondas do mar, Vento nas folhas.
+### `ItemConteudo` — base do catálogo (abstrata)
+Reúne os campos de controle de todo item do catálogo: `id` (ID do documento), `ordem`
+(posição de exibição), `ativo` (`false` oculta o item sem apagá-lo) e `atualizadoEm`. As
+subclasses só têm `fromMap()`: o app lê o catálogo e nunca escreve nele (RN08).
 
-### `SessaoRespiracao` — técnica guiada (catálogo estático)
-Parâmetros da respiração 4-7-8 (F02): `inspirarSeg=4`, `segurarSeg=7`, `expirarSeg=8`.
-Também é conteúdo estático, disponível offline.
+### `ItemHabito` — hábito do checklist (catálogo)
+Item do ritual noturno, lido de `conteudo_habitos`. Ex.: "Reduzir a luz do ambiente",
+"Silenciar as notificações". É igual para todos os usuários.
 
-### `DicaHigieneSono` — orientações (catálogo estático)
-Dicas de higiene do sono (F07). Conteúdo fixo empacotado no app.
+### `Som` — conteúdo de relaxamento (catálogo)
+Metadados em `conteudo_sons`; o arquivo de áudio fica no Firebase Storage
+(`caminhoStorage`). Depois do download, `caminhoLocal` aponta para o arquivo no aparelho e
+`disponivelOffline()` retorna `true` (F03, RNF04). Ex.: Chuva suave, Ondas do mar, Vento
+nas folhas.
+
+### `SessaoRespiracao` — técnica guiada (catálogo)
+Parâmetros da respiração, lidos de `conteudo_respiracao`. Na 4-7-8 (F02): `inspirarSeg=4`,
+`segurarSeg=7`, `expirarSeg=8`. `duracaoTotal()` calcula o tempo da sessão.
+
+### `DicaHigieneSono` — orientações (catálogo)
+Dicas de higiene do sono (F07), lidas de `conteudo_dicas`.
+
+### `VersaoCatalogo` — controle de sincronização
+Espelha `config/catalogo`. `precisaSincronizar(versaoLocal)` retorna `true` quando a versão
+remota é maior que a última baixada (RN09).
 
 ### `ResumoSemanal` — objeto de cálculo (não persistido)
 Objeto derivado que agrega `RegistroSono` da semana para alimentar o gráfico (RF11) e o
@@ -163,16 +201,20 @@ acompanhamento semanal. É calculado em memória a partir dos registros, não é
 
 ---
 
-## 3. Entidades persistidas × estáticas
+## 3. Onde cada classe vive
 
-| Classe | Onde vive | Motivo |
-|---|---|---|
-| Usuario, PreferenciasUsuario | 🔵 Firestore (`usuarios/{uid}`) | dado pessoal |
-| RegistroSono | 🔵 Firestore (subcoleção) | dado do usuário, CRUD |
-| ChecklistDiario (progresso) | 💾 Local no dispositivo (`shared_preferences`) | privado, reseta por dia, sem nuvem |
-| ItemHabito (catálogo) | 📦 Assets locais | lista fixa de hábitos, igual para todos |
-| Som, SessaoRespiracao, DicaHigieneSono | 📦 Assets locais | conteúdo fixo, offline |
-| ResumoSemanal | 🧮 Em memória | calculado, não armazenado |
+| Classe | Onde vive | Quem escreve | Motivo |
+|---|---|---|---|
+| Usuario, PreferenciasUsuario | 🔵 Firestore (`usuarios/{uid}`) | app (usuário) | dado pessoal |
+| RegistroSono | 🔵 Firestore (subcoleção) | app (usuário) | dado do usuário, CRUD |
+| Som | 🌐 Firestore (`conteudo_sons`) + 🎵 Storage + cache | equipe (Console) | conteúdo atualizável sem nova versão |
+| DicaHigieneSono | 🌐 Firestore (`conteudo_dicas`) + cache | equipe (Console) | idem |
+| ItemHabito | 🌐 Firestore (`conteudo_habitos`) + cache | equipe (Console) | idem |
+| SessaoRespiracao | 🌐 Firestore (`conteudo_respiracao`) + cache | equipe (Console) | idem |
+| VersaoCatalogo | 🌐 Firestore (`config/catalogo`) | equipe (Console) | controle de sincronização |
+| ChecklistDiario | 💾 Local (`shared_preferences`) | app (usuário) | privado, reseta por dia, sem nuvem |
+| ResumoSemanal | 🧮 Em memória | — | calculado, não armazenado |
 
-> Essa separação é o que viabiliza o offline-first: o conteúdo de relaxamento nunca
-> depende de rede, e apenas os dados realmente pessoais vão para o banco.
+> O catálogo fica no banco para que a equipe troque conteúdo sem publicar uma nova versão
+> do app, e fica em cache no aparelho para continuar funcionando offline (RNF04). Os dados
+> pessoais ficam isolados por usuário.
