@@ -21,3 +21,10 @@ O SonoLeve é um aplicativo voltado para higiene do sono e relaxamento. A propos
 - Casos de uso - Carlos Eduardo dos Santos 
 - Modelagem de domínio e DER do banco de dados - João Gabriel Batista 
 
+- ## [10/11/2026]
+
+### Adicionado
+- Arquitetura - Julia Cabral
+- Fluxos de navegação - Maria Eduarda 
+- Casos de uso - Carlos Eduardo dos Santos 
+- MVP de baixa fidelidade - João Gabriel Batista 
