@@ -52,4 +52,5 @@
 - - ## [10/11/2026]
 
 ### Adicionado
-- Adicionado o link do trello - Maria Eduarda 
+- Adicionado o link do trello - Maria Eduarda
+- Adição do arquivo pdf - Maria Eduarda e Carlos Eduardo
