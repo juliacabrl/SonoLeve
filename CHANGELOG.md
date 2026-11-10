@@ -47,4 +47,9 @@
 - Iniciamos com a arquitetura - Julia Cabral
 - Fluxos de navegação - Maria Eduarda 
 - casos de uso - Carlos Eduardo dos Santos 
-- Modelagem de domínio e DER do banco de dados - João Gabriel Batista 
+- Modelagem de domínio e DER do banco de dados - João Gabriel Batista
+
+- - ## [10/11/2026]
+
+### Adicionado
+- Trello para organizão do projeto - Maria Eduarda 
