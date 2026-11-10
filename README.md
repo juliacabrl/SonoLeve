@@ -28,3 +28,4 @@ O SonoLeve é um aplicativo voltado para higiene do sono e relaxamento. A propos
 - Protótipo Funcional de baixa fidelidade em flutter/dart - João Gabriel Batista dos Santos
 - Trello para organizão de tarefas - Maria Eduarda 
 Trello : https://trello.com/invite/b/6af398e41cc9ab986ea16c78/ATTIa3b3627240d3b424e74fc7b70d55105e4D1103C3/sonoleve
+- EAP - Maria Eduarda e Carlos Eduardo
