@@ -54,3 +54,4 @@
 ### Adicionado
 - Adicionado o link do trello - Maria Eduarda
 - Adição do arquivo pdf - Maria Eduarda e Carlos Eduardo
+- Protótipo Funcional de baixa fidelidade em flutter/dart - João Gabriel Batista dos Santos
