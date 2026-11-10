@@ -25,3 +25,4 @@ O SonoLeve é um aplicativo voltado para higiene do sono e relaxamento. A propos
 
 ### Adicionado
 
+Trello para organizão de tarefas - Maria Eduarda 
