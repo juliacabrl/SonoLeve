@@ -52,4 +52,4 @@
 - - ## [10/11/2026]
 
 ### Adicionado
-- Trello para organizão do projeto - Maria Eduarda 
+- Adicionado o link do trello - Maria Eduarda 
