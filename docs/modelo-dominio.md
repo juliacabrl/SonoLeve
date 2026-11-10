@@ -169,7 +169,8 @@ acompanhamento semanal. É calculado em memória a partir dos registros, não é
 |---|---|---|
 | Usuario, PreferenciasUsuario | 🔵 Firestore (`usuarios/{uid}`) | dado pessoal |
 | RegistroSono | 🔵 Firestore (subcoleção) | dado do usuário, CRUD |
-| ChecklistDiario, ItemHabito | 🔵 Firestore (subcoleção) | estado diário do usuário |
+| ChecklistDiario (progresso) | 💾 Local no dispositivo (`shared_preferences`) | privado, reseta por dia, sem nuvem |
+| ItemHabito (catálogo) | 📦 Assets locais | lista fixa de hábitos, igual para todos |
 | Som, SessaoRespiracao, DicaHigieneSono | 📦 Assets locais | conteúdo fixo, offline |
 | ResumoSemanal | 🧮 Em memória | calculado, não armazenado |
 

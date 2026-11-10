@@ -12,12 +12,15 @@
 // Mapeamento Firestore -> DER:
 //   usuarios/{uid} .............................. tabela usuarios (+ preferencias_usuario 1:1)
 //   usuarios/{uid}/registrosSono/{id} ........... tabela registros_sono
-//   usuarios/{uid}/checklistDiario/{YYYY-MM-DD} . tabela checklist_diario
-//     array "habitos" (embutido no documento) ... tabela item_habito (normalizada aqui)
 //
-// Conteudo estatico (sons, respiracao 4-7-8, dicas) NAO fica no banco:
-// e empacotado como asset no app (requisito offline RNF04). Por isso
-// nao aparece neste DER.
+// NAO vai ao banco (fora deste DER):
+//   - Catalogo de habitos do checklist: estatico e global (igual para
+//     todos), empacotado como asset do app.
+//   - Progresso diario do checklist (quais habitos o usuario marcou):
+//     armazenado SOMENTE no dispositivo (shared_preferences), reseta
+//     por dia e nao sincroniza com a nuvem.
+//   - Conteudo de relaxamento (sons, respiracao 4-7-8, dicas): assets
+//     do app (requisito offline RNF04).
 // =============================================================
 
 Project SonoLeve {
@@ -25,6 +28,7 @@ Project SonoLeve {
   Note: '''
   App de higiene do sono e relaxamento.
   Dados pessoais escopados por usuario (uid do Firebase Auth).
+  Apenas o DIARIO DO SONO e persistido na nuvem.
   Regras de negocio: qualidade 1..5 (RN01); horas 0..24 (RN02);
   1 registro por dia (RN03); observacao <= 280 (RN04).
   '''
@@ -62,35 +66,12 @@ Table registros_sono {
   indexes {
     (uid, data) [unique, name: 'uq_registro_por_dia'] // RN03: 1 registro por dia
   }
-  Note: 'Subcolecao usuarios/{uid}/registrosSono. Entidade central do CRUD (RF06-RF10).'
-}
-
-Table checklist_diario {
-  id varchar [pk, note: 'ID = data no formato YYYY-MM-DD']
-  uid varchar [not null, note: 'Dono do checklist']
-  data date [not null]
-  total_concluidos int [not null, default: 0, note: 'Cache: nro de habitos marcados']
-
-  indexes {
-    (uid, data) [unique, name: 'uq_checklist_por_dia'] // RN07: 1 por dia
-  }
-  Note: 'Subcolecao usuarios/{uid}/checklistDiario. Ritual noturno (F01, RF01/RF02).'
-}
-
-Table item_habito {
-  id varchar [pk, note: 'Ex.: luz, notificacoes, lugar, tempo']
-  checklist_id varchar [not null, note: 'FK para checklist_diario.id']
-  titulo varchar [not null, note: 'Ex.: Reduzir a luz do ambiente']
-  concluido boolean [not null, default: false]
-
-  Note: 'No Firestore e um elemento do array "habitos" dentro do checklist (normalizado aqui).'
+  Note: 'Subcolecao usuarios/{uid}/registrosSono. Entidade central e UNICO CRUD na nuvem (RF06-RF10).'
 }
 
 // --------- Relacionamentos ---------
-Ref: preferencias_usuario.uid - usuarios.uid        // 1:1
-Ref: registros_sono.uid > usuarios.uid              // 1:N
-Ref: checklist_diario.uid > usuarios.uid            // 1:N
-Ref: item_habito.checklist_id > checklist_diario.id // 1:N
+Ref: preferencias_usuario.uid - usuarios.uid   // 1:1
+Ref: registros_sono.uid > usuarios.uid         // 1:N
 
 // --------- Agrupamento visual ---------
 TableGroup conta_do_usuario {
@@ -100,6 +81,4 @@ TableGroup conta_do_usuario {
 
 TableGroup dados_do_usuario {
   registros_sono
-  checklist_diario
-  item_habito
 }

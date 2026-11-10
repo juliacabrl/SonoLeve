@@ -18,9 +18,8 @@ flowchart TB
     ROOT --> USERS[["📁 usuarios (coleção)"]]
     USERS --> UDOC["📄 {uid} (documento do usuário)<br/>nome · email · criadoEm · preferencias"]
     UDOC --> REG[["📁 registrosSono (subcoleção)"]]
-    UDOC --> CHK[["📁 checklistDiario (subcoleção)"]]
     REG --> RDOC["📄 {registroId}<br/>data · horasDormidas · qualidade · observacao"]
-    CHK --> CDOC["📄 {YYYY-MM-DD}<br/>data · habitos[] · totalConcluidos"]
+    LOC["💾 Progresso do checklist<br/>fica SÓ no dispositivo<br/>(shared_preferences)"]
 ```
 
 Caminho completo das coleções:
@@ -28,8 +27,12 @@ Caminho completo das coleções:
 ```
 usuarios/{uid}
 usuarios/{uid}/registrosSono/{registroId}
-usuarios/{uid}/checklistDiario/{YYYY-MM-DD}
 ```
+
+> **O checklist diário não fica no Firestore.** O catálogo de hábitos é estático e global
+> (asset do app) e o progresso de cada dia é gravado **apenas no dispositivo**
+> (`shared_preferences`), atendendo à privacidade (RNF08) e ao uso offline (RNF04/RNF07)
+> sem custo de nuvem.
 
 > **Por que subcoleções sob o usuário?**
 > 1. **Privacidade** — fica trivial garantir, via *security rules*, que ninguém acesse
@@ -104,39 +107,33 @@ Exemplo:
 
 ---
 
-## 4. Documento `checklistDiario/{YYYY-MM-DD}`
+## 4. Checklist diário — armazenamento **local** (fora do Firestore)
 
-Guarda o estado do ritual noturno de um dia (F01, RF01/RF02). O **ID é a própria data**
-(`2026-11-03`), o que garante um único checklist por dia e evita duplicação.
+O ritual noturno (F01, RF01/RF02) tem duas partes com naturezas diferentes:
 
-| Campo | Tipo Firestore | Tipo Dart | Observações |
-|---|---|---|---|
-| `data` | timestamp | DateTime | dia de referência |
-| `habitos` | array<map> | List\<ItemHabito\> | lista dos hábitos e seu estado |
-| `totalConcluidos` | number | int | cache do nº de hábitos marcados |
+- **Catálogo de hábitos — estático e global.** A lista de hábitos ("Reduzir a luz do
+  ambiente", "Silenciar as notificações", "Preparar um lugar tranquilo", "Reservar um tempo
+  para mim") é **igual para todos os usuários** e é **empacotada como asset/constante** no
+  app. Não vai ao banco.
+- **Progresso do dia — individual e local.** Quais hábitos o usuário marcou em uma data é
+  gravado **apenas no dispositivo**, via `shared_preferences`. Reseta por dia e **não**
+  sincroniza com a nuvem.
 
-Cada item do array `habitos`:
+Formato sugerido no `shared_preferences` (chave = data):
 
-| Campo | Tipo | Dart |
-|---|---|---|
-| `id` | string | String |
-| `titulo` | string | String |
-| `concluido` | bool | bool |
-
-Exemplo (tela "Seu ritual — 2 de 4 hábitos concluídos"):
-
-```json
-{
-  "data": "2026-11-03T00:00:00Z",
-  "totalConcluidos": 2,
-  "habitos": [
-    { "id": "luz",          "titulo": "Reduzir a luz do ambiente", "concluido": true  },
-    { "id": "notificacoes", "titulo": "Silenciar as notificações",  "concluido": true  },
-    { "id": "lugar",        "titulo": "Preparar um lugar tranquilo", "concluido": false },
-    { "id": "tempo",        "titulo": "Reservar um tempo para mim",  "concluido": false }
-  ]
-}
 ```
+chave:  "checklist_2026-11-03"
+valor:  ["luz", "notificacoes"]          // apenas os IDs dos hábitos concluídos
+```
+
+O título de cada hábito vem do catálogo estático — por isso só os **IDs** precisam ser
+guardados. Não há documento, coleção nem *security rule* associados a este dado.
+
+> **Motivação da decisão:** o checklist é um apoio de rotina de curto prazo; mantê-lo local
+> é mais simples, totalmente offline, privado por padrão e sem custo de leitura/escrita no
+> Firestore. Caso, no futuro, o grupo queira histórico/evolução entre aparelhos, basta
+> promovê-lo a uma subcoleção `usuarios/{uid}/checklistDiario/{YYYY-MM-DD}` guardando apenas
+> a lista de IDs concluídos.
 
 ---
 
@@ -209,7 +206,7 @@ factory RegistroSono.fromMap(String id, Map<String, dynamic> map) => RegistroSon
 | Gráfico semanal | RF11 | `registrosSono.where('data', isGreaterThanOrEqualTo: inicioSemana).get()` |
 | Editar registro | RF09 | `registrosSono.doc(id).update(obj.toMap())` |
 | Excluir registro | RF10 | `registrosSono.doc(id).delete()` |
-| Marcar hábito | RF01, RF02 | `checklistDiario.doc('YYYY-MM-DD').set(obj.toMap())` |
+| Marcar hábito | RF01, RF02 | **local** — `prefs.setStringList('checklist_YYYY-MM-DD', ids)` |
 | Excluir todos os dados | RNF09 | apagar documentos sob `usuarios/{uid}` |
 
 ---
@@ -225,7 +222,8 @@ rules*:
 - **RN04** — `observacao` é opcional, limitada a **280 caracteres**.
 - **RN05** — um usuário só pode ler/gravar dados sob o **próprio `uid`**.
 - **RN06** — ao excluir a conta, **todos** os dados do usuário são removidos (RNF09).
-- **RN07** — o checklist diário é identificado pela **data** (um por dia), evitando duplicatas.
+- **RN07** — o progresso do checklist é **local ao dispositivo** e identificado pela **data**
+  (um por dia); o catálogo de hábitos é estático e global, não armazenado no banco.
 
 ---
 
@@ -251,9 +249,6 @@ service cloud.firestore {
           && request.resource.data.horasDormidas <= 24;
       }
 
-      match /checklistDiario/{dia} {
-        allow read, write: if request.auth != null && request.auth.uid == uid;
-      }
     }
   }
 }
