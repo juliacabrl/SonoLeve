@@ -30,8 +30,13 @@ O SonoLeve é um aplicativo voltado para higiene do sono e relaxamento. A propos
 Trello : https://trello.com/invite/b/6af398e41cc9ab986ea16c78/ATTIa3b3627240d3b424e74fc7b70d55105e4D1103C3/sonoleve
 - EAP - Maria Eduarda e Carlos Eduardo
 
-- - ## [15/11/2026]
+### [15/11/2026]
 
 ### Adicionado
 - Escopo do projeto - Julia Cabral da Silva
-- 
+
+### [17/11/2026]
+
+### Adicionado
+- Fluxo de navegação de telas (Figma) - Carlos Eduardo; Julia Cabral 
+
