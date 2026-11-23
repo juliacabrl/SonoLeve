@@ -55,3 +55,14 @@
 - Adicionado o link do trello - Maria Eduarda
 - Adição do arquivo pdf - Maria Eduarda e Carlos Eduardo
 - Protótipo Funcional de baixa fidelidade em flutter/dart - João Gabriel Batista dos Santos
+
+- ## [15/11/2026]
+Adicionado
+Escopo do projeto - Julia Cabral da Silva
+- ## [17/11/2026]
+Adicionado
+Fluxo de navegação de telas (Figma) - Carlos Eduardo; Júlia Cabral
+
+- ## 23/11/2026]
+Adicionado
+Telas "Seu ritual" e "Configurações" - Julia Cabral
