@@ -40,3 +40,7 @@ Trello : https://trello.com/invite/b/6af398e41cc9ab986ea16c78/ATTIa3b3627240d3b4
 ### Adicionado
 - Fluxo de navegação de telas (Figma) - Carlos Eduardo; Julia Cabral 
 
+### 23/11/2026]
+
+### Adicionado
+- Telas "Seu ritual" e "Configurações" - Julia Cabral 
