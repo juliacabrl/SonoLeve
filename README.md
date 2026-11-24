@@ -44,3 +44,4 @@ Trello : https://trello.com/invite/b/6af398e41cc9ab986ea16c78/ATTIa3b3627240d3b4
 
 ### Adicionado
 - Telas "Seu ritual" e "Configurações" - Julia Cabral 
+- telas de "respiração 4-7-8" "meu silencio" - Eduarda Aristides
