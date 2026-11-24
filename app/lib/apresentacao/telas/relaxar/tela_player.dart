@@ -40,8 +40,9 @@ class _TelaPlayerState extends State<TelaPlayer> {
     final som = _preparado
         ? (player.som ?? conteudo.somPorId(widget.idSom))
         : conteudo.somPorId(widget.idSom);
-    final disponiveis =
-        conteudo.catalogo.sonsAtivos.where((s) => s.disponivelOffline).toList();
+    final disponiveis = conteudo.catalogo.sonsAtivos
+        .where((s) => s.disponivelOffline)
+        .toList();
 
     return Scaffold(
       body: SafeArea(
@@ -72,8 +73,9 @@ class _TelaPlayerState extends State<TelaPlayer> {
                     Text(
                       som?.nome ?? 'Som indisponível',
                       textAlign: TextAlign.center,
-                      style:
-                          TipografiaSonoLeve.tituloTela.copyWith(fontSize: 29),
+                      style: TipografiaSonoLeve.tituloTela.copyWith(
+                        fontSize: 29,
+                      ),
                     ),
                     const SizedBox(height: Dimensoes.espacoP),
                     Sobrelinha(
@@ -100,10 +102,11 @@ class _TelaPlayerState extends State<TelaPlayer> {
                           rotulo: player.tocando ? 'Pausar' : 'Tocar',
                           tamanho: 80,
                           tamanhoIcone: 38,
-                          corFundo: CoresSonoLeve.primaria,
+                          corFundo: Theme.of(context).colorScheme.primary,
                           corIcone: CoresSonoLeve.textoSobrePrimaria,
-                          aoTocar:
-                              som == null ? null : player.alternarReproducao,
+                          aoTocar: som == null || player.ocupado
+                              ? null
+                              : player.alternarReproducao,
                         ),
                         const SizedBox(width: Dimensoes.espacoXg),
                         BotaoCircular(
@@ -120,8 +123,11 @@ class _TelaPlayerState extends State<TelaPlayer> {
                     const SizedBox(height: Dimensoes.espacoXg),
                     Row(
                       children: [
-                        const Icon(Icons.volume_down_rounded,
-                            size: 20, color: CoresSonoLeve.textoSecundario),
+                        const Icon(
+                          Icons.volume_down_rounded,
+                          size: 20,
+                          color: CoresSonoLeve.textoSecundario,
+                        ),
                         Expanded(
                           child: SliderTheme(
                             data: SliderTheme.of(context).copyWith(
@@ -131,7 +137,8 @@ class _TelaPlayerState extends State<TelaPlayer> {
                               thumbColor: CoresSonoLeve.primaria,
                               overlayColor: Colors.transparent,
                               thumbShape: const RoundSliderThumbShape(
-                                  enabledThumbRadius: 7),
+                                enabledThumbRadius: 7,
+                              ),
                             ),
                             child: Slider(
                               value: player.volume,
@@ -141,8 +148,11 @@ class _TelaPlayerState extends State<TelaPlayer> {
                             ),
                           ),
                         ),
-                        const Icon(Icons.volume_up_rounded,
-                            size: 20, color: CoresSonoLeve.textoSecundario),
+                        const Icon(
+                          Icons.volume_up_rounded,
+                          size: 20,
+                          color: CoresSonoLeve.textoSecundario,
+                        ),
                       ],
                     ),
                     const SizedBox(height: Dimensoes.espacoXg),
@@ -160,11 +170,8 @@ class _TelaPlayerState extends State<TelaPlayer> {
                       style: TipografiaSonoLeve.legenda,
                     ),
                     const SizedBox(height: Dimensoes.espacoP),
-                    const Text(
-                      'Protótipo: a reprodução de áudio é simulada.',
-                      textAlign: TextAlign.center,
-                      style: TipografiaSonoLeve.mini,
-                    ),
+                    if (player.erro case final mensagem?)
+                      AvisoEmLinha(mensagem: mensagem),
                     const Spacer(),
                     const SizedBox(height: Dimensoes.espacoG),
                   ],

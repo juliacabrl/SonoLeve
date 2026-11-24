@@ -1,9 +1,7 @@
 /// Contratos (interfaces) da camada de dados.
 ///
-/// As telas e controllers dependem SOMENTE destas interfaces. Hoje elas são
-/// implementadas por mocks em memória (`dados/mock/`); na integração com o
-/// Firebase basta criar as implementações reais e trocá-las em
-/// `injecao/dependencias.dart` — nenhuma tela precisa mudar.
+/// As telas usam estes contratos. A versão de teste usa Firebase para sessão
+/// e diário, e o próprio dispositivo para checklist, catálogo e preferências.
 library;
 
 import '../modelos/checklist_diario.dart';
@@ -72,7 +70,7 @@ abstract interface class ChecklistRepository {
   Future<void> limpar();
 }
 
-/// Mapa `preferencias` em `usuarios/{uid}`.
+/// Configurações da interface, vinculadas ao usuário.
 abstract interface class PreferenciasRepository {
   Future<PreferenciasUsuario> carregar(String uid);
 

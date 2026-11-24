@@ -33,14 +33,17 @@ class BotaoPrimario extends StatelessWidget {
         width: double.infinity,
         height: Dimensoes.alturaBotao,
         child: Material(
-          color: aoTocar == null ? _corInativa : CoresSonoLeve.primaria,
+          color: aoTocar == null
+              ? _corInativa
+              : Theme.of(context).colorScheme.primary,
           borderRadius: BorderRadius.circular(Dimensoes.raioBotao),
           child: InkWell(
             onTap: habilitado ? aoTocar : null,
             borderRadius: BorderRadius.circular(Dimensoes.raioBotao),
             child: Padding(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: Dimensoes.espacoG),
+              padding: const EdgeInsets.symmetric(
+                horizontal: Dimensoes.espacoG,
+              ),
               child: Center(
                 child: carregando
                     ? const SizedBox(
@@ -55,9 +58,11 @@ class BotaoPrimario extends StatelessWidget {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           if (icone != null) ...[
-                            Icon(icone,
-                                size: 20,
-                                color: CoresSonoLeve.textoSobrePrimaria),
+                            Icon(
+                              icone,
+                              size: 20,
+                              color: CoresSonoLeve.textoSobrePrimaria,
+                            ),
                             const SizedBox(width: Dimensoes.espacoP),
                           ],
                           // Flexible: com fonte grande (acessibilidade) o texto
@@ -69,7 +74,8 @@ class BotaoPrimario extends StatelessWidget {
                               maxLines: 2,
                               overflow: TextOverflow.ellipsis,
                               style: TipografiaSonoLeve.botao.copyWith(
-                                  color: CoresSonoLeve.textoSobrePrimaria),
+                                color: CoresSonoLeve.textoSobrePrimaria,
+                              ),
                             ),
                           ),
                         ],
@@ -126,8 +132,9 @@ class BotaoContorno extends StatelessWidget {
                   child: Text(
                     texto,
                     overflow: TextOverflow.ellipsis,
-                    style: TipografiaSonoLeve.legenda
-                        .copyWith(color: CoresSonoLeve.texto),
+                    style: TipografiaSonoLeve.legenda.copyWith(
+                      color: CoresSonoLeve.texto,
+                    ),
                   ),
                 ),
               ],
@@ -165,8 +172,10 @@ class BotaoTexto extends StatelessWidget {
           padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
           child: Text(
             texto,
-            style: TipografiaSonoLeve.legenda
-                .copyWith(color: cor, fontWeight: FontWeight.w700),
+            style: TipografiaSonoLeve.legenda.copyWith(
+              color: cor,
+              fontWeight: FontWeight.w700,
+            ),
           ),
         ),
       ),

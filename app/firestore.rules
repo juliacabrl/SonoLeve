@@ -1,0 +1,27 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /usuarios/{uid}/registrosSono/{dia} {
+      function dono() {
+        return request.auth != null && request.auth.uid == uid;
+      }
+
+      function registroValido() {
+        let r = request.resource.data;
+        return r.keys().hasAll(['data', 'horasDormidas', 'qualidade', 'observacao', 'criadoEm', 'atualizadoEm'])
+          && r.keys().hasOnly(['data', 'horasDormidas', 'qualidade', 'observacao', 'criadoEm', 'atualizadoEm'])
+          && dia.matches('^[0-9]{4}-[0-9]{2}-[0-9]{2}$')
+          && r.data == dia
+          && r.horasDormidas is number && r.horasDormidas > 0 && r.horasDormidas <= 24
+          && r.qualidade is int && r.qualidade >= 1 && r.qualidade <= 5
+          && r.observacao is string && r.observacao.size() <= 280
+          && r.criadoEm is timestamp && r.atualizadoEm is timestamp;
+      }
+
+      allow read, delete: if dono();
+      allow create: if dono() && registroValido();
+      allow update: if dono() && registroValido()
+        && request.resource.data.criadoEm == resource.data.criadoEm;
+    }
+  }
+}

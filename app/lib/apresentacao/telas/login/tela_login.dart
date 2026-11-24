@@ -5,6 +5,7 @@ import '../../../core/tema/dimensoes.dart';
 import '../../../core/tema/tipografia.dart';
 import '../../../dados/mock/dados_mock.dart';
 import '../../../estado/auth_controller.dart';
+import '../../../injecao/dependencias.dart';
 import '../../componentes/componentes.dart';
 
 /// Login e cadastro por e-mail e senha (Firebase Auth).
@@ -19,12 +20,22 @@ class TelaLogin extends StatefulWidget {
 }
 
 class _TelaLoginState extends State<TelaLogin> {
-  // Protótipo: credenciais de demonstração já preenchidas.
   final _nome = TextEditingController();
-  final _email = TextEditingController(text: DadosMock.emailDemo);
-  final _senha = TextEditingController(text: DadosMock.senhaDemo);
+  final _email = TextEditingController();
+  final _senha = TextEditingController();
 
   bool _criandoConta = false;
+  bool _demonstracao = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _demonstracao = context.read<Dependencias>().conectividadeSimulada != null;
+    if (_demonstracao) {
+      _email.text = DadosMock.emailDemo;
+      _senha.text = DadosMock.senhaDemo;
+    }
+  }
 
   @override
   void dispose() {
@@ -46,11 +57,15 @@ class _TelaLoginState extends State<TelaLogin> {
   }
 
   Future<void> _enviar() async {
-    FocusScope.of(context).unfocus();
     final auth = context.read<AuthController>();
+    if (auth.processando) return;
+    FocusScope.of(context).unfocus();
     if (_criandoConta) {
       await auth.cadastrar(
-          nome: _nome.text, email: _email.text, senha: _senha.text);
+        nome: _nome.text,
+        email: _email.text,
+        senha: _senha.text,
+      );
     } else {
       await auth.entrar(email: _email.text, senha: _senha.text);
     }
@@ -118,7 +133,7 @@ class _TelaLoginState extends State<TelaLogin> {
                   autofill: [
                     _criandoConta
                         ? AutofillHints.newPassword
-                        : AutofillHints.password
+                        : AutofillHints.password,
                   ],
                 ),
                 if (auth.erro != null) ...[
@@ -140,7 +155,7 @@ class _TelaLoginState extends State<TelaLogin> {
                     aoTocar: auth.processando ? null : _alternarModo,
                   ),
                 ),
-                if (!_criandoConta) ...[
+                if (_demonstracao && !_criandoConta) ...[
                   const SizedBox(height: Dimensoes.espacoG),
                   const NotaRodape(
                     icone: Icons.info_outline,

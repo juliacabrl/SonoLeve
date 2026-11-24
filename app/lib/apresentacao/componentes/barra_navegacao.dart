@@ -21,15 +21,19 @@ class BarraNavegacaoSonoLeve extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: const BoxDecoration(
-        color: CoresSonoLeve.fundo,
-        border: Border(top: BorderSide(color: CoresSonoLeve.borda)),
+      decoration: BoxDecoration(
+        color: Theme.of(context).scaffoldBackgroundColor,
+        border: const Border(top: BorderSide(color: CoresSonoLeve.borda)),
       ),
       child: SafeArea(
         top: false,
         child: Padding(
           padding: const EdgeInsets.fromLTRB(
-              Dimensoes.espacoP, 8, Dimensoes.espacoP, 8),
+            Dimensoes.espacoP,
+            8,
+            Dimensoes.espacoP,
+            8,
+          ),
           child: Row(
             children: [
               for (final aba in AbaPrincipal.values)
@@ -61,8 +65,9 @@ class _ItemNavegacao extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cor =
-        selecionado ? CoresSonoLeve.texto : CoresSonoLeve.textoSecundario;
+    final cor = selecionado
+        ? CoresSonoLeve.texto
+        : CoresSonoLeve.textoSecundario;
     return Semantics(
       button: true,
       selected: selecionado,
@@ -71,7 +76,9 @@ class _ItemNavegacao extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 6),
         child: Material(
-          color: selecionado ? CoresSonoLeve.superficie : Colors.transparent,
+          color: selecionado
+              ? Theme.of(context).colorScheme.surface
+              : Colors.transparent,
           borderRadius: BorderRadius.circular(Dimensoes.raioCartao),
           child: InkWell(
             onTap: aoTocar,
@@ -83,8 +90,10 @@ class _ItemNavegacao extends StatelessWidget {
                 children: [
                   Icon(aba.icone, size: 20, color: cor),
                   const SizedBox(height: 4),
-                  Text(aba.rotulo,
-                      style: TipografiaSonoLeve.mini.copyWith(color: cor)),
+                  Text(
+                    aba.rotulo,
+                    style: TipografiaSonoLeve.mini.copyWith(color: cor),
+                  ),
                 ],
               ),
             ),
