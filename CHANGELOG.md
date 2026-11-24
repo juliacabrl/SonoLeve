@@ -66,4 +66,5 @@ Fluxo de navegação de telas (Figma) - Carlos Eduardo; Júlia Cabral
 - ## 23/11/2026]
 Adicionado
 Telas "Seu ritual" e "Configurações" - Julia Cabral
+
 Telas de "encontre seu silêncio e respiração 4-7-8" - Eduarda Aristides 
