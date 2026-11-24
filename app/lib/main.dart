@@ -3,9 +3,10 @@ import 'package:flutter/services.dart';
 
 import 'app.dart';
 import 'core/tema/cores.dart';
+import 'dados/firebase/configuracao_firebase.dart';
 import 'injecao/dependencias.dart';
 
-void main() {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   // Barra de status discreta sobre o fundo escuro.
@@ -19,7 +20,30 @@ void main() {
     ),
   );
 
-  // Protótipo de baixa fidelidade: dados mockados.
-  // Integração real: trocar por `Dependencias.firebase()` (próxima etapa).
-  runApp(AppSonoLeve(dependencias: Dependencias.mock()));
+  try {
+    await iniciarFirebase();
+    runApp(AppSonoLeve(dependencias: await Dependencias.firebase()));
+  } catch (erro, pilha) {
+    debugPrint('Inicialização do SonoLeve: $erro');
+    debugPrintStack(stackTrace: pilha);
+    runApp(
+      const MaterialApp(
+        debugShowCheckedModeBanner: false,
+        themeMode: ThemeMode.dark,
+        home: Scaffold(
+          backgroundColor: CoresSonoLeve.fundo,
+          body: Center(
+            child: Padding(
+              padding: EdgeInsets.all(24),
+              child: Text(
+                'Não foi possível iniciar o Firebase. Confira a configuração no README.',
+                style: TextStyle(color: CoresSonoLeve.texto),
+                textAlign: TextAlign.center,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 }

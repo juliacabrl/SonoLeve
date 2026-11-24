@@ -28,9 +28,9 @@ abstract final class DadosMock {
           descricao: 'Gotas que desaceleram o dia',
           icone: 'chuva',
           caminhoStorage: 'sons/chuva_suave.mp3',
-          duracaoSeg: 120,
-          tamanhoBytes: 950000,
-          caminhoLocal: 'asset://audios/chuva_suave.mp3',
+          duracaoSeg: 12,
+          tamanhoBytes: 72637,
+          caminhoLocal: 'asset://assets/audios/chuva_suave.mp3',
         ),
         Som(
           id: 'ondas_mar',
@@ -41,9 +41,9 @@ abstract final class DadosMock {
           descricao: 'O ritmo tranquilo da maré',
           icone: 'ondas',
           caminhoStorage: 'sons/ondas_mar.mp3',
-          duracaoSeg: 150,
-          tamanhoBytes: 1100000,
-          caminhoLocal: 'asset://audios/ondas_mar.mp3',
+          duracaoSeg: 12,
+          tamanhoBytes: 72637,
+          caminhoLocal: 'asset://assets/audios/ondas_mar.mp3',
         ),
         Som(
           id: 'vento_folhas',
@@ -54,9 +54,9 @@ abstract final class DadosMock {
           descricao: 'Uma brisa, sem pressa',
           icone: 'vento',
           caminhoStorage: 'sons/vento_folhas.mp3',
-          duracaoSeg: 140,
-          tamanhoBytes: 980000,
-          caminhoLocal: 'asset://audios/vento_folhas.mp3',
+          duracaoSeg: 12,
+          tamanhoBytes: 72637,
+          caminhoLocal: 'asset://assets/audios/vento_folhas.mp3',
         ),
       ];
 

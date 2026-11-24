@@ -53,7 +53,9 @@ class TelaPreferencias extends StatelessWidget {
     if (escolhido != null) {
       await controller.atualizar(
         atual.copyWith(
-            horaInicioNoite: escolhido.$1, horaFimNoite: escolhido.$2),
+          horaInicioNoite: escolhido.$1,
+          horaFimNoite: escolhido.$2,
+        ),
       );
     }
   }
@@ -119,24 +121,30 @@ class TelaPreferencias extends StatelessWidget {
             children: [
               const CabecalhoVoltar(),
               const SizedBox(height: Dimensoes.espacoP),
-              const TituloTela('Do seu jeito.',
-                  subtitulo: 'O SonoLeve acompanha o seu descanso.'),
+              const TituloTela(
+                'Do seu jeito.',
+                subtitulo: 'O SonoLeve acompanha o seu descanso.',
+              ),
               const SizedBox(height: Dimensoes.espacoP),
               LinhaPreferencia(
                 titulo: 'Aparência',
                 valor: preferencias.temaAutomatico
                     ? 'Automática'
                     : 'Sempre noturna',
-                trailing: const Icon(Icons.expand_more,
-                    color: CoresSonoLeve.textoSecundario),
+                trailing: const Icon(
+                  Icons.expand_more,
+                  color: CoresSonoLeve.textoSecundario,
+                ),
                 aoTocar: () => _escolherAparencia(context),
               ),
               LinhaPreferencia(
                 titulo: 'Seu horário noturno',
                 valor:
                     '${preferencias.horaInicioNoite} — ${preferencias.horaFimNoite}',
-                trailing: const Icon(Icons.expand_more,
-                    color: CoresSonoLeve.textoSecundario),
+                trailing: const Icon(
+                  Icons.expand_more,
+                  color: CoresSonoLeve.textoSecundario,
+                ),
                 aoTocar: () => _escolherHorario(context),
               ),
               LinhaPreferencia(
@@ -145,10 +153,10 @@ class TelaPreferencias extends StatelessWidget {
                 trailing: AlternadorSuave(
                   rotulo: 'Reduzir movimento',
                   ativo: preferencias.reduzirMovimento,
-                  aoMudar: (valor) => context
-                      .read<PreferenciasController>()
-                      .atualizar(
-                          preferencias.copyWith(reduzirMovimento: valor)),
+                  aoMudar: (valor) =>
+                      context.read<PreferenciasController>().atualizar(
+                        preferencias.copyWith(reduzirMovimento: valor),
+                      ),
                 ),
               ),
               LinhaPreferencia(
@@ -156,15 +164,19 @@ class TelaPreferencias extends StatelessWidget {
                 valor: sonsOffline == sons.length
                     ? 'Disponíveis'
                     : '$sonsOffline de ${sons.length} sons baixados',
-                trailing: const Icon(Icons.wifi_off,
-                    color: CoresSonoLeve.textoSecundario),
+                trailing: const Icon(
+                  Icons.wifi_off,
+                  color: CoresSonoLeve.textoSecundario,
+                ),
               ),
               const LinhaPreferencia(
                 titulo: 'Seus dados são só seus',
                 valor:
                     'Sem microfone ou sensores. Registros protegidos na sua conta.',
-                trailing: Icon(Icons.shield_outlined,
-                    color: CoresSonoLeve.textoSecundario),
+                trailing: Icon(
+                  Icons.shield_outlined,
+                  color: CoresSonoLeve.textoSecundario,
+                ),
               ),
               if (simulada != null)
                 LinhaPreferencia(
@@ -179,18 +191,23 @@ class TelaPreferencias extends StatelessWidget {
               LinhaPreferencia(
                 titulo: 'Sair da conta',
                 valor: usuario?.email ?? '',
-                trailing: const Icon(Icons.logout,
-                    color: CoresSonoLeve.textoSecundario),
+                trailing: const Icon(
+                  Icons.logout,
+                  color: CoresSonoLeve.textoSecundario,
+                ),
                 aoTocar: () => _sair(context),
               ),
-              LinhaPreferencia(
-                titulo: 'Excluir meus dados',
-                valor: 'Apaga sua conta e seus registros',
-                corTitulo: CoresSonoLeve.destaque,
-                trailing: const Icon(Icons.delete_outline,
-                    color: CoresSonoLeve.destaque),
-                aoTocar: () => _excluirDados(context),
-              ),
+              if (simulada != null)
+                LinhaPreferencia(
+                  titulo: 'Excluir meus dados',
+                  valor: 'Apaga sua conta e seus registros',
+                  corTitulo: CoresSonoLeve.destaque,
+                  trailing: const Icon(
+                    Icons.delete_outline,
+                    color: CoresSonoLeve.destaque,
+                  ),
+                  aoTocar: () => _excluirDados(context),
+                ),
               const SizedBox(height: Dimensoes.espacoXg),
               const CartaoDica(
                 titulo: 'A interface muda suavemente com o horário.',
@@ -198,8 +215,9 @@ class TelaPreferencias extends StatelessWidget {
               ),
               const SizedBox(height: Dimensoes.espacoXg),
               BotaoPrimario(
-                  texto: 'Concluir',
-                  aoTocar: () => Navigator.of(context).maybePop()),
+                texto: 'Concluir',
+                aoTocar: () => Navigator.of(context).maybePop(),
+              ),
               const SizedBox(height: Dimensoes.espacoXg),
             ],
           ),

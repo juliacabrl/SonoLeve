@@ -1,116 +1,215 @@
-# SonoLeve — aplicativo (Flutter)
+# SonoLeve — versão de teste
 
-Protótipo de **baixa fidelidade funcional**: todas as telas e fluxos do SonoLeve
-funcionando com **dados mockados**, já organizados na arquitetura final
-(`docs/arquitetura.md`). A evolução para a alta fidelidade e o produto final
-troca apenas a camada de dados — telas e controllers não mudam.
+Aplicativo Android em Flutter e Dart para testar a rotina de sono. Para a
+execução local, use o Firebase Emulator Suite: Auth e Firestore ficam em
+processos no computador e não exigem uma conta Firebase na nuvem.
 
-## Como rodar
+## Pré-requisitos
 
-Pré-requisito: Flutter 3.19 ou superior (`flutter --version`).
+Instale ou confirme os seguintes itens:
 
-```bash
-cd app
-
-# 1ª vez: gera as pastas de plataforma (android/, ios/).
-# Não sobrescreve lib/, test/ nem pubspec.yaml — arquivos existentes são mantidos.
-flutter create . --project-name sonoleve --org br.edu.unit --platforms android,ios
-
-flutter pub get
-flutter analyze      # deve terminar sem erros
-flutter test         # regras de negócio + fluxos principais
-flutter run
-```
-
-Depois do `flutter create`, **commitem as pastas `android/` e `ios/`**: sem elas a
-correção não consegue compilar o app.
-
-**Conta de demonstração** (já preenchida no login): `jennifer@sonoleve.app` · `123456`.
-Também é possível criar uma conta nova pela própria tela.
-
-## O que dá para testar no protótipo
-
-| Fluxo | Onde | Requisitos |
+| Recurso | Versão recomendada | Como verificar |
 |---|---|---|
-| Login, cadastro, erros de credencial e de conexão | Tela inicial | Auth, a.iv |
-| Ritual noturno: marcar hábitos e ver o progresso | Hoje → Meu ritual | F01, RF01, RF02 |
-| Sons do catálogo, player em loop e desligamento automático | Relaxar | F03, RF04, RF05 |
-| Som novo publicado no catálogo: download e aviso offline | Relaxar → "Lareira acesa" | RN09, RNF04 |
-| Respiração 4-7-8 guiada, com anéis animados | Hoje → Respirar / Relaxar | F02, RF03 |
-| Diário: gráfico semanal, média e lista de noites | Diário | F04–F06, RF11 |
-| CRUD de registros com validações (1–5 ★, 0–24 h, 1 por dia) | Diário → Registrar / tocar numa noite | RF06–RF10, RN01–RN04 |
-| Preferências, sair e excluir meus dados | Hoje → ⚙ | RF13, RNF09 |
-| **Simular modo offline** | Preferências | RNF04, a.iv |
+| Windows 10/11 | - | - |
+| Flutter SDK | 3.38.9 | `flutter --version` |
+| Dart | Incluído no Flutter; 3.10.8 no Flutter 3.38.9 | `dart --version` |
+| Git | Qualquer versão atual | `git --version` |
+| Android Studio | Versão atual | - |
+| Android SDK Platform | 36 | SDK Manager do Android Studio |
+| Android SDK Build-Tools | 35 e 36 | SDK Manager do Android Studio |
+| Android NDK | 28.2.13676358 | SDK Manager do Android Studio |
+| JDK | 21 | `java -version` |
+| Node.js | 20 ou posterior | `node --version` |
+| npm | Incluído no Node.js | `npm --version` |
 
-## Estrutura (`lib/`)
+No Android Studio, abra **SDK Manager → SDK Platforms** e instale **Android
+15/16**, incluindo a Platform 36. Em **SDK Tools**, marque **Android SDK
+Build-Tools**, **NDK (Side by side) 28.2.13676358** e **CMake**. Crie um
+emulador em **Device Manager** com API 36 ou compatível. Para executar no
+computador com o projeto atual, use Android em vez de Windows; o projeto não
+foi configurado para o destino Windows.
 
+Se o Dart do sistema estiver diferente do Dart instalado pelo Flutter, coloque
+`C:\caminho\para\flutter\bin` antes dos demais diretórios do `PATH`. Não use um
+Dart separado para os comandos deste projeto.
+
+## Preparar o SDK do Flutter
+
+Abra o terminal na pasta do SDK do Flutter e selecione exatamente a versão
+recomendada pelo projeto:
+
+```sh
+cd C:\caminho\para\flutter
+git fetch --tags
+git switch --detach 3.38.9
+flutter --version
+flutter doctor -v
 ```
-lib/
-├── main.dart                 # escolhe a fonte de dados (hoje: mock)
-├── app.dart                  # Provider + MaterialApp (tema, pt-BR, rotas)
-├── core/
-│   ├── tema/                 # tokens do Figma: cores, tipografia, dimensões, tema
-│   ├── rotas/                # nomes das rotas e abas
-│   └── utils/                # datas e formatação em português
-├── dominio/                  # 🟩 sem dependência de Firebase
-│   ├── modelos/              # Usuario, RegistroSono, ChecklistDiario, Som, ...
-│   ├── repositorios/         # contratos (interfaces) da camada de dados
-│   ├── servicos/             # Conectividade
-│   └── erros.dart            # falhas com mensagens prontas para o usuário
-├── dados/
-│   └── mock/                 # 🟥 implementações em memória + dados de exemplo
-├── injecao/dependencias.dart # ÚNICO ponto que liga contratos a implementações
-├── estado/                   # 🟨 controllers (ChangeNotifier + Provider)
-└── apresentacao/             # 🟦 UI
-    ├── componentes/          # design system (botões, cartões, anéis, gráfico...)
-    ├── telas/                # login, hoje, ritual, relaxar, player, respiração,
-    │                         # diário, histórico, registrar, preferências
-    └── rotas_app.dart        # geração das rotas (transição suave)
+
+Os SDKs podem ser gerenciados por uma ferramenta como FVM, mas esta versão
+funciona diretamente na pasta apontada por `flutter.sdk` em
+`android/local.properties`. No Windows, se a pasta estiver em outro local,
+atualize esse arquivo local ou execute a configuração do Flutter.
+
+Confirme pelo menos estas partes de `flutter doctor -v`:
+
+- **Flutter** está na versão 3.38.9.
+- **Android toolchain** está disponível e tem licenças aceitas.
+- Um emulador Android aparece em **Connected device**.
+- Se o Visual Studio não estiver instalado, ele não impede o app Android.
+
+```sh
+flutter doctor --android-licenses
 ```
 
-### Design system
+Aceite todas as licenças solicitadas.
 
-Cores, fontes, tamanhos e raios foram extraídos de `prototype/figma/*.svg`:
+## Preparar o projeto
 
-- **Cores** (`core/tema/cores.dart`): fundo `#101827`, superfície `#1B2A41`, borda
-  `#2B3B54`, texto `#EEF1F7` / `#AEB8C8`, primária `#7C8DB5`, lavanda `#A9A4C9`,
-  sálvia `#86A99A` (concluído/offline), âmbar `#D7A17B` (dicas e erros — sem vermelho
-  à noite).
-- **Fonte**: Manrope 400/500/600/700, **embarcada** em `assets/fonts/` (funciona
-  offline; licença OFL incluída).
-- **Componentes** (`apresentacao/componentes/`): cada elemento visual repetido nas
-  telas do Figma virou um widget reutilizável. Para a alta fidelidade, ajustes visuais
-  são feitos ali e se propagam para todas as telas.
+Abra o terminal na pasta que contém `pubspec.yaml` e `firebase.json`, depois
+execute:
 
-## Da baixa para a alta fidelidade / produto final
+```sh
+flutter clean
+flutter pub get
+```
 
-1. **Visual**: refinar os componentes e os tokens de `core/tema` (animações, ícones
-   próprios, tema diurno do RF13).
-2. **Dados reais**: criar `lib/dados/firebase/` com uma implementação para cada
-   contrato de `dominio/repositorios/repositorios.dart`:
+Não é necessário criar `firebase.local.json` ou alterar `google-services.json`
+para o modo de emulador. O projeto já possui os arquivos Android necessários
+para iniciar o Firebase com o modo local.
 
-   | Contrato | Implementação real |
+## Rodar no Android com Firebase Emulator Suite
+
+1. Abra o emulador pelo Android Studio ou inicie um emulador instalado:
+
+```sh
+flutter emulators
+flutter emulators --launch <nome_do_emulador>
+```
+
+2. Em um primeiro terminal, na pasta do projeto, inicie os emuladores:
+
+```sh
+npx firebase-tools@15.9.0 emulators:start --project demo-sonoleve --only auth,firestore
+```
+
+Mantenha esse terminal aberto enquanto usar o app.
+
+3. Em outro terminal, na mesma pasta, confirme o dispositivo e execute:
+
+```sh
+flutter devices
+flutter run -d emulator-5554 --dart-define=FIREBASE_EMULADOR=true
+```
+
+Substitua `emulator-5554` pelo identificador mostrado por `flutter devices`.
+Também é possível omitir `-d` e selecionar o emulador quando houver vários
+dispositivos:
+
+```sh
+flutter run --dart-define=FIREBASE_EMULADOR=true
+```
+
+O app usa `10.0.2.2` para acessar os serviços executados no computador. A
+interface dos emuladores fica em <http://localhost:4000>. Na primeira execução,
+abra **Criar uma conta**, use um e-mail fictício e uma senha de pelo menos seis
+caracteres.
+
+Os dados locais são descartados quando os emuladores são encerrados. Para
+preservá-los entre reinícios, crie uma exportação inicial:
+
+```sh
+npx firebase-tools@15.9.0 emulators:export ./dados-emulador --project demo-sonoleve
+```
+
+Depois, inicie os emuladores usando essa pasta:
+
+```sh
+npx firebase-tools@15.9.0 emulators:start --project demo-sonoleve --only auth,firestore --import=./dados-emulador --export-on-exit
+```
+
+## Rodar sem emuladores locais
+
+O Android físico ou o emulador também pode se conectar ao computador se o
+emulador mudar a configuração `FIREBASE_HOST`. Esse modo serve apenas ao host
+personalizado dos serviços locais:
+
+```sh
+flutter run --dart-define=FIREBASE_EMULADOR=true --dart-define=FIREBASE_HOST=IP_DO_COMPUTADOR
+```
+
+No emulador Android padrão, mantenha `10.0.2.2`.
+
+## Usar o Firebase na nuvem
+
+1. No [Console do Firebase](https://console.firebase.google.com/), registre um
+   app Android com o pacote `br.edu.unit.sonoleve`. Ative **E-mail/senha** no
+   Authentication e crie o banco padrão do Cloud Firestore.
+2. Copie `firebase.local.example.json` para `firebase.local.json`. Use os
+   quatro valores do `google-services.json` do **app Android** correspondente:
+
+   | Campo do exemplo | Campo do arquivo baixado |
    |---|---|
-   | `AuthRepository` | `firebase_auth` (e-mail e senha) |
-   | `RegistroSonoRepository` | `cloud_firestore` — `usuarios/{uid}/registrosSono` |
-   | `ConteudoRepository` | `cloud_firestore` (`conteudo_*`, `config/catalogo`) + `firebase_storage` + `path_provider` |
-   | `ChecklistRepository` | `shared_preferences` |
-   | `PreferenciasRepository` | `cloud_firestore` — mapa `preferencias` em `usuarios/{uid}` |
-   | `Conectividade` | `connectivity_plus` |
+   | `FIREBASE_API_KEY` | `client[].api_key[].current_key` |
+   | `FIREBASE_APP_ID` | `client[].client_info.mobilesdk_app_id` |
+   | `FIREBASE_SENDER_ID` | `project_info.project_number` |
+   | `FIREBASE_PROJECT_ID` | `project_info.project_id` |
 
-3. Criar `Dependencias.firebase()` em `injecao/dependencias.dart` e trocar a chamada
-   em `main.dart`. Os modelos já têm `toMap()`/`fromMap()` compatíveis com o Firestore
-   (aceitam `Timestamp`), conforme `docs/modelagem-banco-dados.md`.
-4. **Áudio**: o `PlayerController` hoje simula a reprodução; basta delegar ao
-   `just_audio`, usando `Som.caminhoLocal`.
+3. Aplique `firestore.rules` a um **projeto de teste**. Para um projeto que já
+   hospeda outros dados, incorpore o bloco do diário às regras existentes.
+   Em um projeto de teste dedicado, a CLI permite publicá-las com
+   `npx firebase-tools@15.9.0 deploy --only firestore:rules --project SEU_ID`.
+4. Execute `flutter run --dart-define-from-file=firebase.local.json`. O app
+   lê as opções em Dart. O JSON de configuração local fica fora do Git.
 
-## Diferenças em relação ao Figma
+## Roteiro de teste
 
-- **Login/cadastro e histórico** não existem no Figma. Foram criados com os mesmos
-  componentes, porque a autenticação é obrigatória e o RF08 pede o histórico.
-- **Textos de privacidade ajustados.** O Figma diz "Seus registros ficam neste
-  dispositivo" e "Sem conta". Com o Firebase Auth e o Firestore, isso não é mais
-  verdade, então os textos passaram a ser "Seus registros ficam protegidos na sua
-  conta" e "Sem microfone ou sensores".
-- **Preferências** ganharam "Sair da conta", "Excluir meus dados" (RNF09) e, só no
-  protótipo, "Simular modo offline".
+| Requisito | Caminho | Resultado esperado |
+|---|---|---|
+| Login e cadastro | Crie uma conta, saia em **Preferências** e tente entrar com senha errada | Exibe uma mensagem. Com a senha correta, abre a aba **Hoje**. |
+| RF01–RF02 · Checklist | **Hoje → Meu ritual**. Marque e desmarque itens. Feche e reabra o app no mesmo dia | O progresso acompanha as marcações e permanece gravado para a conta naquele dispositivo. |
+| RF03 · Respiração | **Hoje → Respirar → Começar** | Alterna 4 s para inspirar, 7 s para segurar e 8 s para expirar. |
+| RF04–RF05 · Sons | **Relaxar → Chuva suave → Tocar**. Pause ou troque de som | O áudio toca em loop e responde aos controles. Repita com a conexão desligada após o primeiro login. |
+| RF06–RF07 · Criar noite | **Diário → Registrar minha noite**. Ajuste duração e estrelas, salve e reabra o app | O registro continua no diário. Uma segunda criação para a mesma data exibe um aviso. |
+| RF08–RF10 · Histórico, edição e exclusão | **Diário → Ver histórico**. Abra um registro, edite e salve. Abra novamente e exclua | A lista mostra os dados atualizados. Após confirmar a exclusão, a noite sai do histórico. |
+| RF11–RF12 · Gráfico e dicas | Registre datas diferentes nos últimos sete dias e volte ao **Diário** | O gráfico e a média refletem as noites registradas. A dica do dia aparece no diário. |
+| RF13 · Paleta | Na engrenagem da home, escolha **Automática**. Compare com **Sempre noturna** durante o dia | Automática usa acentos quentes de dia e paleta azul no intervalo noturno configurado. |
+| Isolamento | Saia, cadastre uma segunda conta e abra **Diário** | Os registros da primeira conta ficam fora da segunda conta. |
+
+## Como o código funciona
+
+- `lib/main.dart` inicializa o Firebase e abre a interface.
+- `lib/injecao/dependencias.dart` conecta as telas às implementações reais.
+  Os mocks servem aos testes automatizados existentes.
+- `lib/dados/firebase/repositorios_firebase.dart` concentra login, cadastro e
+  CRUD. O Firestore guarda as noites em
+  `usuarios/{uid}/registrosSono/{AAAA-MM-DD}`. A data é texto de calendário,
+  para manter o mesmo dia em fusos diferentes. Os demais horários são
+  timestamps. Uma transação protege a criação duplicada e move o registro
+  inteiro quando a data é editada.
+- `lib/dados/local/repositorios_locais.dart` grava checklist e preferências
+  no dispositivo, separados por conta. O catálogo e os três MP3 de teste
+  são embarcados. Os MP3 foram sintetizados para o projeto.
+- `firestore.rules` limita o acesso aos registros ao dono da conta e valida
+  campos, duração, estrelas e tamanho da observação.
+
+A versão requer conexão para o primeiro login e para salvar, editar ou excluir
+noites. Uma sessão aberta pode acessar respiração, checklist e sons sem internet.
+O diário pode consultar o cache disponível. Sons com tela bloqueada, exclusão
+da conta, login social, sincronização do catálogo e personalização por histórico
+ficam fora do escopo desta versão de teste. A exclusão de **cada registro** está
+no próprio diário.
+
+Para verificar o código localmente:
+
+```sh
+flutter analyze
+flutter test
+```
+
+Na revisão desta versão, a análise estática passou sem avisos e os 20 testes
+automatizados passaram. Uma verificação separada, pela API dos emuladores
+Firebase, confirmou cadastro, login, CRUD e isolamento entre contas. A
+execução da interface e do som no Android faz parte do roteiro manual acima.
+
+O [registro de uso de IA](docs/uso-de-ia.md) descreve o apoio usado nesta versão.

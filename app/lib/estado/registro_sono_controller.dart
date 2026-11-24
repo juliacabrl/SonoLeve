@@ -41,12 +41,15 @@ class RegistroSonoController extends ChangeNotifier with NotificadorSeguro {
     _erroCarregamento = null;
     notifyListeners();
     try {
-      _registros = await _repositorio.listar(uid);
+      final registros = await _repositorio.listar(uid);
+      if (_uid == uid) _registros = registros;
     } on FalhaSonoLeve catch (falha) {
-      _erroCarregamento = falha.mensagem;
+      if (_uid == uid) _erroCarregamento = falha.mensagem;
     } finally {
-      _carregando = false;
-      notifyListeners();
+      if (_uid == uid) {
+        _carregando = false;
+        notifyListeners();
+      }
     }
   }
 
@@ -57,13 +60,17 @@ class RegistroSonoController extends ChangeNotifier with NotificadorSeguro {
     final problemas = registro.validar();
     if (problemas.isNotEmpty) return problemas.first;
     try {
-      if (registro.salvo) {
-        await _repositorio.atualizar(uid, registro);
-      } else {
-        await _repositorio.criar(uid, registro);
+      final salvo = registro.salvo
+          ? await _repositorio.atualizar(uid, registro)
+          : await _repositorio.criar(uid, registro);
+      if (_uid == uid) {
+        _registros = [
+          for (final anterior in _registros)
+            if (anterior.id != registro.id && anterior.id != salvo.id) anterior,
+          salvo,
+        ]..sort((a, b) => b.data.compareTo(a.data));
+        notifyListeners();
       }
-      _registros = await _repositorio.listar(uid);
-      notifyListeners();
       return null;
     } on FalhaSonoLeve catch (falha) {
       return falha.mensagem;
@@ -75,8 +82,10 @@ class RegistroSonoController extends ChangeNotifier with NotificadorSeguro {
     if (uid == null) return null;
     try {
       await _repositorio.excluir(uid, idRegistro);
-      _registros = _registros.where((r) => r.id != idRegistro).toList();
-      notifyListeners();
+      if (_uid == uid) {
+        _registros = _registros.where((r) => r.id != idRegistro).toList();
+        notifyListeners();
+      }
       return null;
     } on FalhaSonoLeve catch (falha) {
       return falha.mensagem;
@@ -86,6 +95,8 @@ class RegistroSonoController extends ChangeNotifier with NotificadorSeguro {
   /// Ao sair da conta.
   void limpar() {
     _uid = null;
+    _carregando = false;
+    _erroCarregamento = null;
     _registros = const [];
     notifyListeners();
   }

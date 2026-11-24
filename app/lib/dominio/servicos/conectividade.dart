@@ -3,8 +3,7 @@ import 'package:flutter/foundation.dart';
 /// Estado da conexão, observável pelas telas (selo "Offline") e usado pelos
 /// repositórios para decidir entre rede e cache.
 ///
-/// No protótipo a conexão é simulada (Preferências → "Simular modo offline");
-/// no produto final será implementada com o pacote `connectivity_plus`.
+/// A versão com Firebase observa a conexão pelo `connectivity_plus`.
 abstract class Conectividade extends ChangeNotifier {
   bool get online;
 }

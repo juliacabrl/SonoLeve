@@ -6,7 +6,18 @@ import 'tipografia.dart';
 /// Tema global do SonoLeve: escuro por padrão (RNF03), poucos estímulos
 /// visuais e sem efeitos de toque chamativos (RNF11).
 abstract final class TemaApp {
-  static ThemeData get escuro {
+  static final diurno = escuro.copyWith(
+    colorScheme: escuro.colorScheme.copyWith(
+      primary: CoresSonoLeve.destaque,
+      surface: const Color(0xFF38303A),
+    ),
+    scaffoldBackgroundColor: const Color(0xFF2A232B),
+    canvasColor: const Color(0xFF2A232B),
+  );
+
+  static final escuro = _criarEscuro();
+
+  static ThemeData _criarEscuro() {
     // ColorScheme.dark mantém compatibilidade entre versões do Flutter
     // (os parâmetros obrigatórios do construtor padrão mudaram no 3.22).
     const esquema = ColorScheme.dark(

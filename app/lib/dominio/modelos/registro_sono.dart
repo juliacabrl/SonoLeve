@@ -71,12 +71,15 @@ class RegistroSono {
     if (qualidade < qualidadeMinima || qualidade > qualidadeMaxima) {
       problemas.add('Escolha uma avaliação de 1 a 5 estrelas.');
     }
-    if (horasDormidas <= 0 || horasDormidas > horasMaximas) {
-      problemas.add('As horas dormidas precisam ficar entre 0 e 24.');
+    if (!horasDormidas.isFinite ||
+        horasDormidas <= 0 ||
+        horasDormidas > horasMaximas) {
+      problemas.add('Informe mais de 0 e no máximo 24 horas dormidas.');
     }
     if (observacao.length > tamanhoMaximoObservacao) {
       problemas.add(
-          'A observação pode ter até $tamanhoMaximoObservacao caracteres.');
+        'A observação pode ter até $tamanhoMaximoObservacao caracteres.',
+      );
     }
     if (Datas.soDia(data).isAfter(Datas.soDia(DateTime.now()))) {
       problemas.add('Não é possível registrar uma noite futura.');
@@ -93,26 +96,25 @@ class RegistroSono {
     int? qualidade,
     String? observacao,
     DateTime? atualizadoEm,
-  }) =>
-      RegistroSono(
-        id: id ?? this.id,
-        data: data ?? this.data,
-        horasDormidas: horasDormidas ?? this.horasDormidas,
-        qualidade: qualidade ?? this.qualidade,
-        observacao: observacao ?? this.observacao,
-        criadoEm: criadoEm,
-        atualizadoEm: atualizadoEm ?? this.atualizadoEm,
-      );
+  }) => RegistroSono(
+    id: id ?? this.id,
+    data: data ?? this.data,
+    horasDormidas: horasDormidas ?? this.horasDormidas,
+    qualidade: qualidade ?? this.qualidade,
+    observacao: observacao ?? this.observacao,
+    criadoEm: criadoEm,
+    atualizadoEm: atualizadoEm ?? this.atualizadoEm,
+  );
 
   /// O `id` não é gravado como campo: ele é o ID do documento.
   Map<String, Object?> toMap() => {
-        'data': data,
-        'horasDormidas': horasDormidas,
-        'qualidade': qualidade,
-        'observacao': observacao,
-        'criadoEm': criadoEm,
-        'atualizadoEm': atualizadoEm,
-      };
+    'data': data,
+    'horasDormidas': horasDormidas,
+    'qualidade': qualidade,
+    'observacao': observacao,
+    'criadoEm': criadoEm,
+    'atualizadoEm': atualizadoEm,
+  };
 
   factory RegistroSono.fromMap(String id, Map<String, Object?> mapa) =>
       RegistroSono(
